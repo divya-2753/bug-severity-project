@@ -17,7 +17,8 @@ USERS = {
 }
 
 # ☁️ Firebase setup
-cred = credentials.Certificate("firebase.json")
+cred_dict = json.loads(os.environ["FIREBASE_KEY"])
+cred = credentials.Certificate(cred_dict)
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://bug-severity-project-default-rtdb.firebaseio.com/'
 })
