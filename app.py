@@ -8,8 +8,8 @@ import csv
 from io import StringIO
 import json
 
-app = Flask(__name__)
-app.secret_key = "secret123"
+app = Flask(__name__,
+templates_folder='templates')
 
 # 🔐 USERS (ROLE SYSTEM)
 USERS = {
