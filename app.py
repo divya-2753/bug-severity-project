@@ -9,7 +9,7 @@ from io import StringIO
 import json
 
 app = Flask(__name__,
-templates_folder='templates')
+template_folder='templates')
 
 # 🔐 USERS (ROLE SYSTEM)
 USERS = {
