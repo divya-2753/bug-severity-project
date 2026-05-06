@@ -6,6 +6,7 @@ from firebase_admin import credentials, db
 import matplotlib.pyplot as plt
 import csv
 from io import StringIO
+import json
 
 app = Flask(__name__)
 app.secret_key = "secret123"
@@ -17,9 +18,14 @@ USERS = {
 }
 
 # ☁️ Firebase setup
-cred_dict = json.loads(os.environ["FIREBASE_KEY"])
-cred = credentials.Certificate(cred_dict)
-firebase_admin.initialize_app(cred, {
+firebase_json = os.environ.get('FIREBASE_JSON_KEY')
+if firebase_json:
+    cred_dict = json.loads(firebase_json)
+    cred = credentials.Certificate(cred_dict)
+else:
+    cred = credentials.Certificate("firebase.json")
+if not firebase_admin._apps:
+    firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://bug-severity-project-default-rtdb.firebaseio.com/'
 })
 
