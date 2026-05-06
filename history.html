@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>History</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: linear-gradient(135deg,#1f4037,#99f2c8);
+            text-align: center;
+        }
+
+        .container {
+            width: 90%;
+            margin: 40px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        h2 { margin-bottom: 20px; }
+
+        .controls {
+            margin-bottom: 20px;
+        }
+
+        input, select {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            margin: 5px;
+        }
+
+        button {
+            padding: 8px 12px;
+            border: none;
+            background: #1f4037;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #1f4037;
+            color: white;
+            padding: 10px;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background: #f2f2f2;
+        }
+
+        .high { color: red; font-weight: bold; }
+        .medium { color: orange; font-weight: bold; }
+        .low { color: green; font-weight: bold; }
+
+        .delete {
+            color: red;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        .delete:hover {
+            color: darkred;
+        }
+
+        a.back {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #1f4037;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>📁 Bug History</h2>
+
+    <!-- 🔍 Controls -->
+    <div class="controls">
+
+        <input type="text" id="search" placeholder="Search bug...">
+
+        <select id="filter">
+            <option value="">All</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+        </select>
+
+        <button onclick="applyFilter()">Apply</button>
+
+        <!-- 🔥 CSV EXPORT (Admin Only) -->
+        {% if role == 'admin' %}
+        <a href="/download">
+            <button>📥 Export CSV</button>
+        </a>
+        {% endif %}
+
+    </div>
+
+    <table id="table">
+
+        <tr>
+            <th>Bug</th>
+            <th>Severity</th>
+            <th>Suggestion</th>
+            <th>Time</th>
+            <th>Action</th>
+        </tr>
+
+        {% for key, item in data.items() %}
+        <tr>
+            <td>{{ item.bug }}</td>
+
+            <td class="
+                {% if item.severity == 'High' %}high{% endif %}
+                {% if item.severity == 'Medium' %}medium{% endif %}
+                {% if item.severity == 'Low' %}low{% endif %}
+            ">
+                {{ item.severity }}
+            </td>
+
+            <td>{{ item.suggestion }}</td>
+            <td>{{ item.time }}</td>
+
+            <td>
+                <!-- ❌ Delete only admin -->
+                {% if role == 'admin' %}
+                <a href="/delete/{{ key }}" class="delete">❌</a>
+                {% else %}
+                🔒
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <a href="/dashboard" class="back">⬅️ Back to Dashboard</a>
+
+</div>
+
+<script>
+function applyFilter() {
+    let search = document.getElementById("search").value.toLowerCase();
+    let filter = document.getElementById("filter").value;
+
+    let rows = document.querySelectorAll("#table tr");
+
+    rows.forEach((row, index) => {
+        if (index === 0) return;
+
+        let bug = row.cells[0].innerText.toLowerCase();
+        let severity = row.cells[1].innerText.trim();
+
+        let matchSearch = bug.includes(search);
+        let matchFilter = (filter === "" || severity === filter);
+
+        row.style.display = (matchSearch && matchFilter) ? "" : "none";
+    });
+}
+</script>
+
+</body>
+</html>
