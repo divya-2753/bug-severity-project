@@ -3,6 +3,8 @@ import os
 from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, db
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import csv
 from io import StringIO
