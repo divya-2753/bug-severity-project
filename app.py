@@ -10,7 +10,7 @@ import json
 
 app = Flask(__name__,
 template_folder='templates')
-app.secrete_key = 'supersecretkey123'
+app.secret_key = 'supersecretkey123'
 
 # 🔐 USERS (ROLE SYSTEM)
 USERS = {
