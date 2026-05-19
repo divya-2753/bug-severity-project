@@ -548,56 +548,54 @@ def history():
 def bug_detail(id):
     if 'user' not in session:
         return redirect('/')
- 
-    ref = db.reference(f"bugs/{id}")
-    bug = ref.get()
- 
+
+    data = get_all_bugs()
+    bug = data.get(id)
+
     if not bug:
         return redirect('/history')
- 
+
     bug['id'] = id
     return render_template("bug_detail.html", bug=bug, role=session.get('role', 'User'))
- 
 # ================ UPDATE BUG STATUS ================
  
 @app.route('/bug/update/<id>', methods=['POST'])
 def update_bug(id):
     if 'user' not in session:
         return redirect('/')
- 
-    ref = db.reference(f"bugs/{id}")
-    bug = ref.get()
- 
+
+    bug = BUGS.get(id)
+
     if bug:
         new_status = request.form.get('status', bug.get('status', 'Open'))
         new_assigned = request.form.get('assigned_to', bug.get('assigned_to', ''))
         new_priority = request.form.get('priority', bug.get('priority', 'P2'))
         comment = request.form.get('comment', '').strip()
- 
+
         update_data = {
             'status': new_status,
             'assigned_to': new_assigned,
             'priority': new_priority
         }
- 
-        # Resolved time set करा
+
         if new_status == 'Resolved' and not bug.get('resolved_time'):
             update_data['resolved_time'] = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
- 
-        # Comment add करा
+
         if comment:
             comments = bug.get('comments', [])
             if isinstance(comments, dict):
                 comments = list(comments.values())
+
             comments.append({
                 "text": comment,
                 "by": session['user'],
                 "time": str(datetime.now().strftime("%Y-%m-%d %H:%M"))
             })
+
             update_data['comments'] = comments
- 
-        ref.update(update_data)
- 
+
+        BUGS[id].update(update_data)
+
     return redirect(f'/bug/{id}')
  
 # ================ ANALYTICS ================
@@ -801,13 +799,14 @@ def download_json():
 def delete(id):
     if 'user' not in session:
         return redirect('/')
- 
+
     # फक्त Admin delete करू शकतो
     if session.get('role') != 'Admin':
         return redirect('/history')
- 
-    ref = db.reference("bugs")
-    ref.child(id).delete()
+
+    if id in BUGS:
+        del BUGS[id]
+
     return redirect('/history')
  
 # ================ ADMIN PANEL ================
