@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BugTracker Pro — Bug Detail</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+    --bg: #1a1f2e;
+    --surface: #242938;
+    --surface2: #2d3447;
+    --border: #3a4157;
+    --accent: #4f8ef7;
+    --accent2: #22d3ee;
+    --danger: #f87171;
+    --warning: #fbbf24;
+    --success: #34d399;
+    --text: #e8edf5;
+    --muted: #8896b3;
+}
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:var(--bg); font-family:'Syne',sans-serif; color:var(--text); min-height:100vh; display:flex; }
+        .sidebar { width:240px; min-height:100vh; background:var(--surface); border-right:1px solid var(--border); padding:24px 16px; display:flex; flex-direction:column; position:fixed; top:0; left:0; z-index:100; }
+        .sidebar-logo { display:flex; align-items:center; gap:12px; padding:0 8px; margin-bottom:32px; }
+        .sidebar-logo .icon { width:38px; height:38px; background:linear-gradient(135deg,#3b82f6,#06b6d4); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+        .sidebar-logo h2 { font-size:16px; font-weight:800; }
+        .sidebar-logo span { font-size:10px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+        .nav-section { font-size:10px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:2px; padding:0 8px; margin-bottom:8px; font-family:'JetBrains Mono',monospace; }
+        .nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; color:var(--muted); text-decoration:none; font-size:14px; font-weight:600; transition:all 0.2s; margin-bottom:2px; }
+        .nav-item:hover { background:var(--surface2); color:var(--text); }
+        .nav-divider { height:1px; background:var(--border); margin:16px 0; }
+        .sidebar-bottom { margin-top:auto; }
+        .user-card { background:var(--surface2); border-radius:12px; padding:12px; display:flex; align-items:center; gap:10px; }
+        .user-avatar { width:36px; height:36px; background:linear-gradient(135deg,#3b82f6,#8b5cf6); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+        .user-info h4 { font-size:13px; font-weight:700; }
+        .user-info span { font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+        .logout-btn { display:block; text-align:center; padding:8px; margin-top:8px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:12px; transition:all 0.2s; font-family:'JetBrains Mono',monospace; }
+        .logout-btn:hover { color:var(--danger); }
+        .main { margin-left:240px; flex:1; padding:32px; }
+        .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+        .topbar h1 { font-size:24px; font-weight:800; }
+        .topbar p { font-size:13px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:20px; }
+        .card-title { font-size:16px; font-weight:800; margin-bottom:16px; }
+        .grid-2 { display:grid; grid-template-columns:2fr 1fr; gap:20px; }
+        .info-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border); }
+        .info-row:last-child { border-bottom:none; }
+        .info-label { font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:1px; }
+        .info-value { font-size:14px; font-weight:600; font-family:'JetBrains Mono',monospace; }
+        .badge { padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700; font-family:'JetBrains Mono',monospace; }
+        .badge-high { background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3); }
+        .badge-medium { background:rgba(245,158,11,0.15); color:#fbbf24; border:1px solid rgba(245,158,11,0.3); }
+        .badge-low { background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); }
+        .tag { padding:3px 10px; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.2); border-radius:20px; font-size:11px; color:#60a5fa; font-family:'JetBrains Mono',monospace; display:inline-block; margin:3px; }
+        .bug-desc { background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:20px; font-family:'JetBrains Mono',monospace; font-size:15px; line-height:1.7; margin-bottom:20px; color:var(--text); }
+        .confidence-bar { height:8px; background:var(--border); border-radius:4px; overflow:hidden; margin:8px 0; }
+        .confidence-fill { height:100%; border-radius:4px; transition:width 1s; }
+        label { display:block; font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; font-family:'JetBrains Mono',monospace; }
+        select, textarea, input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:var(--text); font-size:13px; font-family:'JetBrains Mono',monospace; outline:none; margin-bottom:14px; transition:all 0.2s; }
+        select:focus, textarea:focus { border-color:var(--accent); }
+        select option { background:var(--surface); }
+        .btn { padding:10px 20px; border:none; border-radius:10px; font-size:13px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; transition:all 0.2s; text-decoration:none; display:inline-block; }
+        .btn-primary { background:linear-gradient(135deg,#3b82f6,#06b6d4); color:white; }
+        .btn-secondary { background:var(--surface2); color:var(--muted); border:1px solid var(--border); }
+        .comment-item { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:10px; }
+        .comment-meta { font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-bottom:6px; }
+        .comment-text { font-size:13px; font-family:'JetBrains Mono',monospace; line-height:1.6; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
+        .animate { animation:fadeUp 0.5s ease both; }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="sidebar-logo"><div class="icon">🐛</div><div><h2>BugTracker</h2><span>// Pro v2.0</span></div></div>
+    <div class="nav-section">Main</div>
+    <a href="/dashboard" class="nav-item"><span>📊</span> <span>Dashboard</span></a>
+    <a href="/history" class="nav-item"><span>📋</span> <span>History</span></a>
+    <a href="/analytics" class="nav-item"><span>📈</span> <span>Analytics</span></a>
+    <div class="nav-divider"></div>
+    <div class="nav-section">Reports</div>
+    <a href="/report" class="nav-item"><span>📄</span> <span>Reports</span></a>
+    <a href="/download/csv" class="nav-item"><span>⬇️</span> <span>Export CSV</span></a>
+    <div class="nav-divider"></div>
+    <div class="nav-section">Account</div>
+    <a href="/profile" class="nav-item"><span>👤</span> <span>Profile</span></a>
+    {% if role == 'Admin' %}<a href="/admin" class="nav-item"><span>⚙️</span> <span>Admin Panel</span></a>{% endif %}
+    <div class="sidebar-bottom">
+        <div class="user-card"><div class="user-avatar">👤</div><div class="user-info"><h4>Bug Detail</h4><span>{{ role }}</span></div></div>
+        <a href="/logout" class="logout-btn">→ Logout</a>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar animate">
+        <div>
+            <h1>🐛 Bug Detail</h1>
+            <p>// ID: {{ bug.id }}</p>
+        </div>
+        <a href="/history" class="btn btn-secondary">← Back to History</a>
+    </div>
+
+    <div class="grid-2">
+        <div>
+            <!-- BUG DESCRIPTION -->
+            <div class="card animate">
+                <div class="card-title">📝 Bug Description</div>
+                <div class="bug-desc">{{ bug.bug }}</div>
+
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+                    <span class="badge badge-{{ bug.severity|lower }}">{{ bug.severity }} Severity</span>
+                    {% set tags = bug.get('tags', []) %}
+                    {% if tags is iterable and tags is not string %}
+                        {% for tag in tags %}<span class="tag">{{ tag }}</span>{% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- AI Confidence -->
+                <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:14px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace;">AI Confidence</span>
+                        <span style="font-weight:800; font-family:'JetBrains Mono',monospace; color:{% if bug.get('confidence',0) >= 80 %}#34d399{% else %}#fbbf24{% endif %};">{{ bug.get('confidence', 0) }}%</span>
+                    </div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width:{{ bug.get('confidence',0) }}%; background:{% if bug.severity == 'High' %}#ef4444{% elif bug.severity == 'Medium' %}#f59e0b{% else %}#10b981{% endif %};"></div>
+                    </div>
+                    <p style="font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-top:8px;">{{ bug.suggestion }}</p>
+                </div>
+            </div>
+
+            <!-- COMMENTS -->
+            <div class="card animate">
+                <div class="card-title">💬 Comments</div>
+                {% set comments = bug.get('comments', []) %}
+                {% if comments %}
+                    {% if comments is mapping %}
+                        {% for key, c in comments.items() %}
+                        <div class="comment-item">
+                            <div class="comment-meta">👤 {{ c.by }} · {{ c.time }}</div>
+                            <div class="comment-text">{{ c.text }}</div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        {% for c in comments %}
+                        <div class="comment-item">
+                            <div class="comment-meta">👤 {{ c.by }} · {{ c.time }}</div>
+                            <div class="comment-text">{{ c.text }}</div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                {% else %}
+                <p style="color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:13px; text-align:center; padding:20px;">No comments yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div>
+            <!-- BUG INFO -->
+            <div class="card animate">
+                <div class="card-title">ℹ️ Bug Info</div>
+                <div class="info-row">
+                    <span class="info-label">Status</span>
+                    <span class="info-value" style="color:#60a5fa;">{{ bug.get('status','Open') }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Priority</span>
+                    <span class="info-value">{{ bug.get('priority','P2') }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Submitted By</span>
+                    <span class="info-value">{{ bug.get('submitted_by','-') }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Assigned To</span>
+                    <span class="info-value">{{ bug.get('assigned_to','-') or '-' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Submitted</span>
+                    <span class="info-value" style="color:var(--muted);">{{ bug.get('time','')[:16] }}</span>
+                </div>
+                {% if bug.get('resolved_time') %}
+                <div class="info-row">
+                    <span class="info-label">Resolved</span>
+                    <span class="info-value" style="color:#34d399;">{{ bug.resolved_time[:16] }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- UPDATE FORM -->
+            <div class="card animate">
+                <div class="card-title">✏️ Update Bug</div>
+                <form method="POST" action="/bug/update/{{ bug.id }}">
+                    <label>Status</label>
+                    <select name="status">
+                        {% for s in ['Open','In Progress','Testing','Resolved','Closed'] %}
+                        <option value="{{ s }}" {% if bug.get('status') == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label>Priority</label>
+                    <select name="priority">
+                        <option value="P1" {% if bug.get('priority') == 'P1' %}selected{% endif %}>P1 — Critical</option>
+                        <option value="P2" {% if bug.get('priority') == 'P2' %}selected{% endif %}>P2 — Normal</option>
+                        <option value="P3" {% if bug.get('priority') == 'P3' %}selected{% endif %}>P3 — Low</option>
+                    </select>
+
+                    <label>Assign To</label>
+                    <input type="text" name="assigned_to" value="{{ bug.get('assigned_to','') }}" placeholder="developer / tester">
+
+                    <label>Add Comment</label>
+                    <textarea name="comment" placeholder="Add a note or update..." rows="3"></textarea>
+
+                    <button type="submit" class="btn btn-primary" style="width:100%;">💾 Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

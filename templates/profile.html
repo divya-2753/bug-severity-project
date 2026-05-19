@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BugTracker Pro — Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+      :root {
+    --bg: #1a1f2e;
+    --surface: #242938;
+    --surface2: #2d3447;
+    --border: #3a4157;
+    --accent: #4f8ef7;
+    --accent2: #22d3ee;
+    --danger: #f87171;
+    --warning: #fbbf24;
+    --success: #34d399;
+    --text: #e8edf5;
+    --muted: #8896b3;
+}
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:var(--bg); font-family:'Syne',sans-serif; color:var(--text); min-height:100vh; display:flex; }
+        .sidebar { width:240px; min-height:100vh; background:var(--surface); border-right:1px solid var(--border); padding:24px 16px; display:flex; flex-direction:column; position:fixed; top:0; left:0; z-index:100; }
+        .sidebar-logo { display:flex; align-items:center; gap:12px; padding:0 8px; margin-bottom:32px; }
+        .sidebar-logo .icon { width:38px; height:38px; background:linear-gradient(135deg,#3b82f6,#06b6d4); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+        .sidebar-logo h2 { font-size:16px; font-weight:800; }
+        .sidebar-logo span { font-size:10px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+        .nav-section { font-size:10px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:2px; padding:0 8px; margin-bottom:8px; font-family:'JetBrains Mono',monospace; }
+        .nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; color:var(--muted); text-decoration:none; font-size:14px; font-weight:600; transition:all 0.2s; margin-bottom:2px; }
+        .nav-item:hover { background:var(--surface2); color:var(--text); }
+        .nav-item.active { background:rgba(59,130,246,0.15); color:var(--accent); border:1px solid rgba(59,130,246,0.2); }
+        .nav-divider { height:1px; background:var(--border); margin:16px 0; }
+        .sidebar-bottom { margin-top:auto; }
+        .user-card { background:var(--surface2); border-radius:12px; padding:12px; display:flex; align-items:center; gap:10px; }
+        .user-avatar { width:36px; height:36px; background:linear-gradient(135deg,#3b82f6,#8b5cf6); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+        .user-info h4 { font-size:13px; font-weight:700; }
+        .user-info span { font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+        .logout-btn { display:block; text-align:center; padding:8px; margin-top:8px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:12px; font-family:'JetBrains Mono',monospace; }
+        .logout-btn:hover { color:var(--danger); background:rgba(239,68,68,0.1); }
+        .main { margin-left:240px; flex:1; padding:32px; }
+        .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+        .topbar h1 { font-size:26px; font-weight:800; }
+        .topbar p { font-size:13px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:20px; }
+        .card-title { font-size:16px; font-weight:800; margin-bottom:16px; }
+        .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+        .profile-hero { background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(6,182,212,0.1)); border:1px solid rgba(59,130,246,0.2); border-radius:20px; padding:32px; display:flex; align-items:center; gap:24px; margin-bottom:24px; }
+        .profile-avatar { width:80px; height:80px; background:linear-gradient(135deg,#3b82f6,#8b5cf6); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:36px; flex-shrink:0; }
+        .profile-name { font-size:24px; font-weight:800; }
+        .profile-role { font-size:13px; color:var(--accent); font-family:'JetBrains Mono',monospace; margin-top:4px; }
+        .profile-email { font-size:13px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-top:4px; }
+        .stat-mini { text-align:center; padding:16px; background:var(--surface2); border-radius:12px; }
+        .stat-mini-val { font-size:28px; font-weight:800; }
+        .stat-mini-label { font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-top:4px; }
+        .mini-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
+        table { width:100%; border-collapse:collapse; }
+        th { text-align:left; padding:10px 12px; font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; font-family:'JetBrains Mono',monospace; border-bottom:1px solid var(--border); }
+        td { padding:12px; font-size:13px; border-bottom:1px solid rgba(30,41,59,0.5); font-family:'JetBrains Mono',monospace; }
+        tr:last-child td { border-bottom:none; }
+        .badge { padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; font-family:'JetBrains Mono',monospace; }
+        .badge-high { background:rgba(239,68,68,0.15); color:#f87171; }
+        .badge-medium { background:rgba(245,158,11,0.15); color:#fbbf24; }
+        .badge-low { background:rgba(16,185,129,0.15); color:#34d399; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(15px)} to{opacity:1;transform:translateY(0)} }
+        .animate { animation:fadeUp 0.5s ease both; }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="sidebar-logo"><div class="icon">🐛</div><div><h2>BugTracker</h2><span>// Pro v2.0</span></div></div>
+    <div class="nav-section">Main</div>
+    <a href="/dashboard" class="nav-item"><span>📊</span> <span>Dashboard</span></a>
+    <a href="/history" class="nav-item"><span>📋</span> <span>History</span></a>
+    <a href="/analytics" class="nav-item"><span>📈</span> <span>Analytics</span></a>
+    <div class="nav-divider"></div>
+    <div class="nav-section">Reports</div>
+    <a href="/report" class="nav-item"><span>📄</span> <span>Reports</span></a>
+    <a href="/download/csv" class="nav-item"><span>⬇️</span> <span>Export CSV</span></a>
+    <div class="nav-divider"></div>
+    <div class="nav-section">Account</div>
+    <a href="/profile" class="nav-item active"><span>👤</span> <span>Profile</span></a>
+    {% if role == 'Admin' %}<a href="/admin" class="nav-item"><span>⚙️</span> <span>Admin Panel</span></a>{% endif %}
+    <div class="sidebar-bottom">
+        <div class="user-card"><div class="user-avatar">👤</div><div class="user-info"><h4>{{ username }}</h4><span>{{ role }}</span></div></div>
+        <a href="/logout" class="logout-btn">→ Logout</a>
+    </div>
+</aside>
+<main class="main">
+    <div class="topbar animate"><div><h1>My Profile 👤</h1><p>// {{ username }}'s workspace</p></div></div>
+    <div class="profile-hero animate">
+        <div class="profile-avatar">👤</div>
+        <div>
+            <div class="profile-name">{{ user.name if user else username }}</div>
+            <div class="profile-role">// {{ role }}</div>
+            <div class="profile-email">{{ user.email if user else '' }}</div>
+        </div>
+    </div>
+    <div class="mini-grid animate">
+        <div class="stat-mini"><div class="stat-mini-val" style="color:#60a5fa;">{{ my_bugs|length }}</div><div class="stat-mini-label">Bugs Submitted</div></div>
+        <div class="stat-mini"><div class="stat-mini-val" style="color:#34d399;">{{ my_resolved }}</div><div class="stat-mini-label">Resolved</div></div>
+        <div class="stat-mini"><div class="stat-mini-val" style="color:#f87171;">{{ my_open }}</div><div class="stat-mini-label">Open</div></div>
+    </div>
+    <div class="grid-2">
+        <div class="card animate">
+            <div class="card-title">🐛 My Recent Bugs</div>
+            {% if my_bugs %}
+            <table>
+                <thead><tr><th>Bug</th><th>Severity</th><th>Status</th><th>Time</th></tr></thead>
+                <tbody>
+                {% for bug in my_bugs[:8] %}
+                <tr>
+                    <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ bug.bug[:35] }}...</td>
+                    <td><span class="badge badge-{{ bug.severity|lower }}">{{ bug.severity }}</span></td>
+                    <td style="color:var(--muted);">{{ bug.get('status','Open') }}</td>
+                    <td style="color:var(--muted);">{{ bug.get('time','')[:10] }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="color:var(--muted);font-family:'JetBrains Mono',monospace;text-align:center;padding:30px;">No bugs submitted yet!</p>
+            {% endif %}
+        </div>
+        <div class="card animate">
+            <div class="card-title">🕐 Recent Login History</div>
+            {% if my_logins %}
+            <table>
+                <thead><tr><th>Time</th><th>Role</th></tr></thead>
+                <tbody>
+                {% for login in my_logins %}
+                <tr>
+                    <td style="color:var(--muted);">{{ login.get('time','')[:16] }}</td>
+                    <td style="color:#60a5fa;">{{ login.get('role','') }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="color:var(--muted);font-family:'JetBrains Mono',monospace;text-align:center;padding:30px;">No login history</p>
+            {% endif %}
+        </div>
+    </div>
+</main>
+</body>
+</html>

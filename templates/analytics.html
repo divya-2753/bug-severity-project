@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BugTracker Pro — Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+    --bg: #1a1f2e;
+    --surface: #242938;
+    --surface2: #2d3447;
+    --border: #3a4157;
+    --accent: #4f8ef7;
+    --accent2: #22d3ee;
+    --danger: #f87171;
+    --warning: #fbbf24;
+    --success: #34d399;
+    --text: #e8edf5;
+    --muted: #8896b3;
+}
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:var(--bg); font-family:'Syne',sans-serif; color:var(--text); min-height:100vh; display:flex; }
+        .sidebar { width:240px; min-height:100vh; background:var(--surface); border-right:1px solid var(--border); padding:24px 16px; display:flex; flex-direction:column; position:fixed; top:0; left:0; z-index:100; }
+        .sidebar-logo { display:flex; align-items:center; gap:12px; padding:0 8px; margin-bottom:32px; }
+        .sidebar-logo .icon { width:38px; height:38px; background:linear-gradient(135deg,#3b82f6,#06b6d4); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+        .sidebar-logo h2 { font-size:16px; font-weight:800; }
+        .sidebar-logo span { font-size:10px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+        .nav-section { font-size:10px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:2px; padding:0 8px; margin-bottom:8px; font-family:'JetBrains Mono',monospace; }
+        .nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; color:var(--muted); text-decoration:none; font-size:14px; font-weight:600; transition:all 0.2s; margin-bottom:2px; }
+        .nav-item:hover { background:var(--surface2); color:var(--text); }
+        .nav-item.active { background:rgba(59,130,246,0.15); color:var(--accent); border:1px solid rgba(59,130,246,0.2); }
+        .nav-divider { height:1px; background:var(--border); margin:16px 0; }
+        .sidebar-bottom { margin-top:auto; }
+        .user-card { background:var(--surface2); border-radius:12px; padding:12px; display:flex; align-items:center; gap:10px; }
+        .user-avatar { width:36px; height:36px; background:linear-gradient(135deg,#3b82f6,#8b5cf6); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+        .user-info h4 { font-size:13px; font-weight:700; }
+        .user-info span { font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+        .logout-btn { display:block; text-align:center; padding:8px; margin-top:8px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:12px; font-family:'JetBrains Mono',monospace; }
+        .logout-btn:hover { color:var(--danger); background:rgba(239,68,68,0.1); }
+        .main { margin-left:240px; flex:1; padding:32px; }
+        .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+        .topbar h1 { font-size:26px; font-weight:800; }
+        .topbar p { font-size:13px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+        .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+        .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; position:relative; overflow:hidden; }
+        .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+        .stat-card.c1::before { background:linear-gradient(90deg,#3b82f6,#06b6d4); }
+        .stat-card.c2::before { background:var(--danger); }
+        .stat-card.c3::before { background:var(--warning); }
+        .stat-card.c4::before { background:var(--success); }
+        .stat-label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; font-family:'JetBrains Mono',monospace; margin-bottom:8px; }
+        .stat-value { font-size:32px; font-weight:800; line-height:1; margin-bottom:4px; }
+        .stat-sub { font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:20px; }
+        .card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+        .card-title { font-size:16px; font-weight:800; }
+        .card-sub { font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+        .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+        .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; }
+        .chart-img { width:100%; border-radius:10px; max-height:280px; object-fit:contain; }
+        .keyword-item { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+        .keyword-item:last-child { border-bottom:none; }
+        .keyword-bar { height:6px; background:linear-gradient(90deg,#3b82f6,#06b6d4); border-radius:3px; }
+        .tag { padding:4px 12px; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.2); border-radius:20px; font-size:12px; color:#60a5fa; font-family:'JetBrains Mono',monospace; display:inline-block; margin:4px; }
+        .status-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
+        .status-row:last-child { border-bottom:none; }
+        .status-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(15px)} to{opacity:1;transform:translateY(0)} }
+        .animate { animation:fadeUp 0.5s ease both; }
+        .delay-1 { animation-delay:0.1s; }
+        .delay-2 { animation-delay:0.2s; }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="sidebar-logo"><div class="icon">🐛</div><div><h2>BugTracker</h2><span>// Pro v2.0</span></div></div>
+    <div class="nav-section">Main</div>
+    <a href="/dashboard" class="nav-item"><span>📊</span> <span>Dashboard</span></a>
+    <a href="/history" class="nav-item"><span>📋</span> <span>History</span></a>
+    <a href="/analytics" class="nav-item active"><span>📈</span> <span>Analytics</span></a>
+    <div class="nav-divider"></div>
+    <div class="nav-section">Reports</div>
+    <a href="/report" class="nav-item"><span>📄</span> <span>Reports</span></a>
+    <a href="/download/csv" class="nav-item"><span>⬇️</span> <span>Export CSV</span></a>
+    <div class="nav-divider"></div>
+    <div class="nav-section">Account</div>
+    <a href="/profile" class="nav-item"><span>👤</span> <span>Profile</span></a>
+    {% if role == 'Admin' %}<a href="/admin" class="nav-item"><span>⚙️</span> <span>Admin Panel</span></a>{% endif %}
+    <div class="sidebar-bottom">
+        <div class="user-card"><div class="user-avatar">👤</div><div class="user-info"><h4>Analytics</h4><span>{{ role }}</span></div></div>
+        <a href="/logout" class="logout-btn">→ Logout</a>
+    </div>
+</aside>
+<main class="main">
+    <div class="topbar animate"><div><h1>Analytics 📈</h1><p>// Deep insights into your bug data</p></div></div>
+    <div class="stats-grid">
+        <div class="stat-card c1 animate"><div class="stat-label">Total Bugs</div><div class="stat-value">{{ total }}</div><div class="stat-sub">all time</div></div>
+        <div class="stat-card c2 animate delay-1"><div class="stat-label">🔴 High</div><div class="stat-value">{{ count.High }}</div><div class="stat-sub">{{ ((count.High / total * 100) | round(1)) if total > 0 else 0 }}%</div></div>
+        <div class="stat-card c3 animate delay-1"><div class="stat-label">Avg Resolution</div><div class="stat-value">{{ avg_resolution }}h</div><div class="stat-sub">hours to fix</div></div>
+        <div class="stat-card c4 animate delay-2"><div class="stat-label">✅ Resolved</div><div class="stat-value">{{ status_count.Resolved }}</div><div class="stat-sub">bugs fixed</div></div>
+    </div>
+    <div class="grid-2 animate delay-1">
+        <div class="card">
+            <div class="card-header"><div><div class="card-title">🥧 Severity Distribution</div><div class="card-sub">// pie chart</div></div></div>
+            <img src="/static/pie_chart.png?v={{ total }}" class="chart-img">
+        </div>
+        <div class="card">
+            <div class="card-header"><div><div class="card-title">📊 Bug Status Overview</div><div class="card-sub">// bar chart</div></div></div>
+            <img src="/static/bar_chart.png?v={{ total }}" class="chart-img">
+        </div>
+    </div>
+    <div class="card animate delay-2">
+        <div class="card-header"><div><div class="card-title">📈 7-Day Bug Trend</div><div class="card-sub">// daily severity breakdown</div></div></div>
+        <img src="/static/trend_chart.png?v={{ total }}" class="chart-img" style="max-height:300px;">
+    </div>
+    <div class="grid-3 animate delay-2">
+        <div class="card">
+            <div class="card-header"><div><div class="card-title">🔤 Top Keywords</div><div class="card-sub">// most common words</div></div></div>
+            {% if top_keywords %}
+                {% set max_count = top_keywords[0][1] %}
+                {% for word, cnt in top_keywords %}
+                <div class="keyword-item">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:13px;">{{ word }}</span>
+                    <div style="flex:1;margin:0 12px;"><div class="keyword-bar" style="width:{{ (cnt/max_count*100)|int }}%;"></div></div>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);">{{ cnt }}</span>
+                </div>
+                {% endfor %}
+            {% else %}<p style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:13px;">No data yet</p>{% endif %}
+        </div>
+        <div class="card">
+            <div class="card-header"><div><div class="card-title">🔄 Status Breakdown</div><div class="card-sub">// lifecycle overview</div></div></div>
+            {% set status_colors = {'Open':'#3b82f6','In Progress':'#f59e0b','Testing':'#8b5cf6','Resolved':'#10b981','Closed':'#64748b'} %}
+            {% for status, cnt in status_count.items() %}
+            <div class="status-row">
+                <div class="status-dot" style="background:{{ status_colors.get(status,'#64748b') }};"></div>
+                <span style="flex:1;font-size:13px;font-family:'JetBrains Mono',monospace;">{{ status }}</span>
+                <span style="font-weight:800;font-size:16px;color:{{ status_colors.get(status,'#64748b') }};">{{ cnt }}</span>
+                <span style="font-size:12px;color:var(--muted);margin-left:8px;">({{ ((cnt/total*100)|round(1)) if total > 0 else 0 }}%)</span>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="card">
+            <div class="card-header"><div><div class="card-title">🏷️ Bug Categories</div><div class="card-sub">// auto-detected tags</div></div></div>
+            {% if tag_counts %}
+                {% for tag, cnt in tag_counts %}
+                <div class="keyword-item"><span class="tag">{{ tag }}</span><span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;">{{ cnt }}</span></div>
+                {% endfor %}
+            {% else %}<p style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:13px;">No tags yet</p>{% endif %}
+        </div>
+    </div>
+</main>
+</body>
+</html>

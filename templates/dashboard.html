@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BugTracker Pro — Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+    --bg: #1a1f2e;
+    --surface: #242938;
+    --surface2: #2d3447;
+    --border: #3a4157;
+    --accent: #4f8ef7;
+    --accent2: #22d3ee;
+    --danger: #f87171;
+    --warning: #fbbf24;
+    --success: #34d399;
+    --text: #e8edf5;
+    --muted: #8896b3;
+}
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:var(--bg); font-family:'Syne',sans-serif; color:var(--text); min-height:100vh; display:flex; }
+        .sidebar { width:240px; min-height:100vh; background:var(--surface); border-right:1px solid var(--border); padding:24px 16px; display:flex; flex-direction:column; position:fixed; top:0; left:0; z-index:100; }
+        .sidebar-logo { display:flex; align-items:center; gap:12px; padding:0 8px; margin-bottom:32px; }
+        .sidebar-logo .icon { width:38px; height:38px; background:linear-gradient(135deg,#3b82f6,#06b6d4); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+        .sidebar-logo h2 { font-size:16px; font-weight:800; }
+        .sidebar-logo span { font-size:10px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+        .nav-section { font-size:10px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:2px; padding:0 8px; margin-bottom:8px; font-family:'JetBrains Mono',monospace; }
+        .nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; color:var(--muted); text-decoration:none; font-size:14px; font-weight:600; transition:all 0.2s; margin-bottom:2px; }
+        .nav-item:hover { background:var(--surface2); color:var(--text); }
+        .nav-item.active { background:rgba(59,130,246,0.15); color:var(--accent); border:1px solid rgba(59,130,246,0.2); }
+        .nav-divider { height:1px; background:var(--border); margin:16px 0; }
+        .sidebar-bottom { margin-top:auto; }
+        .user-card { background:var(--surface2); border-radius:12px; padding:12px; display:flex; align-items:center; gap:10px; }
+        .user-avatar { width:36px; height:36px; background:linear-gradient(135deg,#3b82f6,#8b5cf6); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+        .user-info h4 { font-size:13px; font-weight:700; }
+        .user-info span { font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+        .logout-btn { display:block; text-align:center; padding:8px; margin-top:8px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:12px; transition:all 0.2s; font-family:'JetBrains Mono',monospace; }
+        .logout-btn:hover { color:var(--danger); background:rgba(239,68,68,0.1); }
+        .main { margin-left:240px; flex:1; padding:32px; }
+        .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; }
+        .topbar h1 { font-size:26px; font-weight:800; }
+        .topbar p { font-size:13px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+        .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
+        .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; position:relative; overflow:hidden; transition:transform 0.2s; }
+        .stat-card:hover { transform:translateY(-2px); }
+        .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+        .stat-card.total::before { background:linear-gradient(90deg,#3b82f6,#06b6d4); }
+        .stat-card.high::before { background:var(--danger); }
+        .stat-card.medium::before { background:var(--warning); }
+        .stat-card.low::before { background:var(--success); }
+        .stat-label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; font-family:'JetBrains Mono',monospace; margin-bottom:8px; }
+        .stat-value { font-size:36px; font-weight:800; line-height:1; margin-bottom:4px; }
+        .stat-sub { font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:20px; }
+        .card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+        .card-title { font-size:16px; font-weight:800; }
+        .card-sub { font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+        .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+        .form-group { margin-bottom:16px; }
+        label { display:block; font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; font-family:'JetBrains Mono',monospace; }
+        textarea, select { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:12px 16px; color:var(--text); font-size:14px; font-family:'JetBrains Mono',monospace; transition:all 0.2s; outline:none; }
+        textarea { resize:vertical; min-height:80px; }
+        textarea:focus, select:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(59,130,246,0.15); }
+        select option { background:var(--surface); }
+        .btn { padding:11px 22px; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; transition:all 0.2s; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+        .btn-primary { background:linear-gradient(135deg,#3b82f6,#06b6d4); color:white; }
+        .btn-primary:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(59,130,246,0.4); }
+        .btn-secondary { background:var(--surface2); color:var(--muted); border:1px solid var(--border); }
+        .badge { padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; font-family:'JetBrains Mono',monospace; }
+        .badge-high { background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3); }
+        .badge-medium { background:rgba(245,158,11,0.15); color:#fbbf24; border:1px solid rgba(245,158,11,0.3); }
+        .badge-low { background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); }
+        .badge-open { background:rgba(59,130,246,0.15); color:#60a5fa; }
+        .badge-inprogress { background:rgba(245,158,11,0.15); color:#fbbf24; }
+        .badge-resolved { background:rgba(16,185,129,0.15); color:#34d399; }
+        table { width:100%; border-collapse:collapse; }
+        th { text-align:left; padding:10px 12px; font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; font-family:'JetBrains Mono',monospace; border-bottom:1px solid var(--border); }
+        td { padding:12px; font-size:13px; border-bottom:1px solid rgba(30,41,59,0.5); font-family:'JetBrains Mono',monospace; }
+        tr:hover td { background:rgba(30,41,59,0.3); }
+        tr:last-child td { border-bottom:none; }
+        .result-box { border-radius:14px; padding:20px; margin-top:16px; border:1px solid; animation:fadeUp 0.4s ease; }
+        .result-high { background:rgba(239,68,68,0.08); border-color:rgba(239,68,68,0.3); }
+        .result-medium { background:rgba(245,158,11,0.08); border-color:rgba(245,158,11,0.3); }
+        .result-low { background:rgba(16,185,129,0.08); border-color:rgba(16,185,129,0.3); }
+        .confidence-bar { height:6px; background:var(--border); border-radius:3px; overflow:hidden; margin:8px 0; }
+        .confidence-fill { height:100%; border-radius:3px; transition:width 1s ease; }
+        .tags-list { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+        .tag { padding:3px 10px; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.2); border-radius:20px; font-size:11px; color:#60a5fa; font-family:'JetBrains Mono',monospace; }
+        .chart-img { width:100%; border-radius:10px; max-height:280px; object-fit:contain; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(15px)} to{opacity:1;transform:translateY(0)} }
+        .animate { animation:fadeUp 0.5s ease both; }
+        .delay-1 { animation-delay:0.1s; }
+        .delay-2 { animation-delay:0.2s; }
+        .delay-3 { animation-delay:0.3s; }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="icon">🐛</div>
+        <div><h2>BugTracker</h2><span>// Pro v2.0</span></div>
+    </div>
+    <div class="nav-section">Main</div>
+    <a href="/dashboard" class="nav-item active"><span>📊</span> <span>Dashboard</span></a>
+    <a href="/history" class="nav-item"><span>📋</span> <span>History</span></a>
+    <a href="/analytics" class="nav-item"><span>📈</span> <span>Analytics</span></a>
+    <div class="nav-divider"></div>
+    <div class="nav-section">Reports</div>
+    <a href="/report" class="nav-item"><span>📄</span> <span>Reports</span></a>
+    <a href="/download/csv" class="nav-item"><span>⬇️</span> <span>Export CSV</span></a>
+    <div class="nav-divider"></div>
+    <div class="nav-section">Account</div>
+    <a href="/profile" class="nav-item"><span>👤</span> <span>Profile</span></a>
+    {% if role == 'Admin' %}
+    <a href="/admin" class="nav-item"><span>⚙️</span> <span>Admin Panel</span></a>
+    {% endif %}
+    <div class="sidebar-bottom">
+        <div class="user-card">
+            <div class="user-avatar">👤</div>
+            <div class="user-info"><h4>{{ username }}</h4><span>{{ role }}</span></div>
+        </div>
+        <a href="/logout" class="logout-btn">→ Logout</a>
+    </div>
+</aside>
+<main class="main">
+    <div class="topbar animate">
+        <div>
+            <h1>Dashboard 📊</h1>
+            <p>// Welcome back, {{ username }} · {{ role }}</p>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);" id="clock"></div>
+    </div>
+    <div class="stats-grid">
+        <div class="stat-card total animate delay-1">
+            <div class="stat-label">Total Bugs</div>
+            <div class="stat-value">{{ total }}</div>
+            <div class="stat-sub">all time</div>
+        </div>
+        <div class="stat-card high animate delay-1">
+            <div class="stat-label">🔴 High</div>
+            <div class="stat-value">{{ count.High }}</div>
+            <div class="stat-sub">{{ high_p }}% of total</div>
+        </div>
+        <div class="stat-card medium animate delay-2">
+            <div class="stat-label">🟡 Medium</div>
+            <div class="stat-value">{{ count.Medium }}</div>
+            <div class="stat-sub">{{ medium_p }}% of total</div>
+        </div>
+        <div class="stat-card low animate delay-3">
+            <div class="stat-label">🟢 Low</div>
+            <div class="stat-value">{{ count.Low }}</div>
+            <div class="stat-sub">{{ low_p }}% of total</div>
+        </div>
+    </div>
+    <div class="grid-2">
+        <div class="card animate delay-1">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">🤖 Submit New Bug</div>
+                    <div class="card-sub">// AI will classify automatically</div>
+                </div>
+            </div>
+            <form method="POST" action="/dashboard">
+                <div class="form-group">
+                    <label>Bug Description</label>
+                    <textarea name="bug" placeholder="Describe the bug in detail..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select name="priority">
+                        <option value="P1">P1 — Critical</option>
+                        <option value="P2" selected>P2 — Normal</option>
+                        <option value="P3">P3 — Low Priority</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">🤖 Analyze & Submit</button>
+            </form>
+            {% if ai_result %}
+            <div class="result-box result-{{ result|lower }}">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <span style="font-size:18px;font-weight:800;">
+                        {% if result == 'High' %}🔴{% elif result == 'Medium' %}🟡{% else %}🟢{% endif %}
+                        {{ result }} Severity
+                    </span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);">{{ ai_result.confidence }}% confident</span>
+                </div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" style="width:{{ ai_result.confidence }}%;background:{% if result == 'High' %}#ef4444{% elif result == 'Medium' %}#f59e0b{% else %}#10b981{% endif %}"></div>
+                </div>
+                <p style="font-size:13px;color:var(--muted);margin:10px 0;font-family:'JetBrains Mono',monospace;">{{ ai_result.suggestion }}</p>
+                <div class="tags-list">
+                    {% for tag in ai_result.tags %}<span class="tag">{{ tag }}</span>{% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="card animate delay-2">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">📊 Severity Distribution</div>
+                    <div class="card-sub">// real-time data</div>
+                </div>
+            </div>
+            <img src="/static/pie_chart.png?v={{ range(1,99999)|random }}" class="chart-img" alt="Chart">
+        </div>
+    </div>
+    <div class="card animate delay-2">
+        <div class="card-header">
+            <div>
+                <div class="card-title">📈 Bug Trend — Last 7 Days</div>
+                <div class="card-sub">// daily severity breakdown</div>
+            </div>
+        </div>
+        <img src="/static/trend_chart.png?v={{ range(1,99999)|random }}" class="chart-img" alt="Trend">
+    </div>
+    <div class="card animate delay-3">
+        <div class="card-header">
+            <div>
+                <div class="card-title">🕐 Recent Bugs</div>
+                <div class="card-sub">// last 5 submitted</div>
+            </div>
+            <a href="/history" class="btn btn-secondary" style="font-size:12px;padding:8px 14px;">View All →</a>
+        </div>
+        {% if recent_bugs %}
+        <table>
+            <thead><tr><th>Bug</th><th>Severity</th><th>Status</th><th>By</th><th>Time</th><th>Action</th></tr></thead>
+            <tbody>
+                {% for bug in recent_bugs %}
+                <tr>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ bug.bug[:50] }}{% if bug.bug|length > 50 %}...{% endif %}</td>
+                    <td><span class="badge badge-{{ bug.severity|lower }}">{{ bug.severity }}</span></td>
+                    <td><span class="badge badge-{{ bug.status|lower|replace(' ','') }}">{{ bug.status }}</span></td>
+                    <td style="color:var(--muted);">{{ bug.get('submitted_by','-') }}</td>
+                    <td style="color:var(--muted);">{{ bug.get('time','-')[:16] }}</td>
+                    <td><a href="/bug/{{ bug.id }}" class="btn btn-secondary" style="font-size:11px;padding:5px 10px;">View</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align:center;padding:40px;color:var(--muted);font-family:'JetBrains Mono',monospace;">No bugs yet! Submit your first bug 🎉</div>
+        {% endif %}
+    </div>
+</main>
+<script>
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('clock').textContent = now.toLocaleDateString('en-IN') + ' · ' + now.toLocaleTimeString('en-IN');
+    }
+    updateClock(); setInterval(updateClock, 1000);
+    window.addEventListener('load', () => {
+        const fill = document.querySelector('.confidence-fill');
+        if (fill) { const w = fill.style.width; fill.style.width='0'; setTimeout(()=>fill.style.width=w, 100); }
+    });
+</script>
+</body>
+</html>
