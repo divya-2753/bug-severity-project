@@ -404,18 +404,16 @@ def login():
     username = request.form.get('username', '').strip()
     password = request.form.get('password', '').strip()
  
-    if not username or not password:
+     if not username or not password:
         return render_template("login.html", error="Username आणि Password टाका!")
- 
-   if username == 'admin' and password == 'admin123':
+     if username == 'admin' and password == 'admin123':
         session.permanent = True
         session['user'] = username
         session['role'] = 'Admin'
         session['name'] = 'Admin User'
         return redirect('/dashboard')
-     
-    user = get_user(username)
-    if user and user['password'] == hash_password(password):
+     user = get_user(username)
+     if user and user['password'] == hash_password(password):
         session.permanent = True
         session['user'] = username
         session['role'] = user['role']
