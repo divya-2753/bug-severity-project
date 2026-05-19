@@ -22,12 +22,18 @@ app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
 app.permanent_session_lifetime = timedelta(hours=2)
  
 # ================ FIREBASE SETUP ================
- 
-cred = credentials.Certificate("firebase.json")
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://bug-severity-project-default-rtdb.firebaseio.com/'  # 👈 तुझा Firebase URL इथे टाक
-})
- 
+if not firebase_admin._apps:
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    json_path = os.path.join(base_path, "firebase.json")
+    try:
+        cred = credentials.Certificate(json_path)
+        firebase_admin.initialize_app(cred, {
+            'databaseURL': 'https://bug-severity-project-default-rtdb.firebaseio.com'
+        })
+    except Exception as e:
+        firebase_admin.initialize_app(options={
+            'databaseURL': 'https://bug-severity-project-default-rtdb.firebaseio.com'
+        })
 # ================ USERS (Role Based) ================
  
 # Password hashing function
