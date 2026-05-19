@@ -409,7 +409,7 @@ def login():
  
     user = get_user(username)
  
-    if (username == 'admin' and password == 'admin123' or (user and user['password'] == hash_password(password):
+    if (username == 'admin' and password == 'admin123' or (user and user['password'] == hash_password(password)):
         session.permanent = True
         session['user'] = username
         session['role'] = user['role']
