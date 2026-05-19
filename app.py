@@ -898,9 +898,9 @@ def server_error(e):
     return render_template("login.html", error="Server Error! Admin ला contact करा."), 500
  
 # ================ RUN ================
- 
-if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5000)
+ if _name_ == "_main_":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(debug=True, host='0.0.0.0', port=port)
 
 
 
