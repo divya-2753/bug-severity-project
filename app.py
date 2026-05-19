@@ -397,40 +397,36 @@ def home():
     if 'user' in session:
         return redirect('/dashboard')
     return render_template("login.html")
- 
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form.get('username', '').strip()
     password = request.form.get('password', '').strip()
 
-    if not username or not password:
-        return render_template("login.html", error="Username आणि Password टाका!")
-
-    # १. Admin लॉगिन (थेट कोडमधून)
-    if username == 'admin' and password == 'admin123':
-        session.permanent = True
-        session['user'] = username
-        session['role'] = 'Admin'
-        session['name'] = 'Admin User'
+    # ADMIN LOGIN
+    if username == "admin" and password == "admin123":
+        session['user'] = "admin"
+        session['role'] = "Admin"
+        session['name'] = "Admin User"
         return redirect('/dashboard')
 
-    # २. Developer लॉगिन (डेटाबेस खराब असला तरी थेट चालेल)
-    if username == 'developer' and password == 'dev123':
-        session.permanent = True
-        session['user'] = username
-        session['role'] = 'Developer'
-        session['name'] = 'Dev User'
+    # DEVELOPER LOGIN
+    elif username == "developer" and password == "dev123":
+        session['user'] = "developer"
+        session['role'] = "Developer"
+        session['name'] = "Developer User"
         return redirect('/dashboard')
 
-    # ३. Tester लॉगिन (थेट कोडमधून)
-    if username == 'tester' and password == 'test123':
-        session.permanent = True
-        session['user'] = username
-        session['role'] = 'Tester'
-        session['name'] = 'Tester User'
+    # TESTER LOGIN
+    elif username == "tester" and password == "test123":
+        session['user'] = "tester"
+        session['role'] = "Tester"
+        session['name'] = "Tester User"
         return redirect('/dashboard')
 
-    return render_template("login.html", error="❌ चुकीचा Username किंवा Password!")
+    return render_template(
+        "login.html",
+        error="❌ चुकीचा Username किंवा Password!"
+    )
 # ================ DASHBOARD ================
  
 @app.route('/dashboard', methods=['GET', 'POST'])
