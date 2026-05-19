@@ -398,36 +398,34 @@ def create_bar_chart(status_count):
     plt.close()
  
 # ================ LOGIN ================
- 
-@app.route('/')
-def home():
-    if 'user' in session:
-        return redirect('/dashboard')
-    return render_template("login.html")
- 
-@app.route('/login', methods=['POST'])
+ @app.route('/login', methods=['POST'])
 def login():
     username = request.form.get('username', '').strip()
     password = request.form.get('password', '').strip()
- 
-     if not username or not password:
+
+    if not username or not password:
         return render_template("login.html", error="Username आणि Password टाका!")
-     if username == 'admin' and password == 'admin123':
+
+    # admin लॉगिन बायपास (लोकल आणि ऑनलाईन सर्व्हरसाठी)
+    if username == 'admin' and password == 'admin123':
         session.permanent = True
         session['user'] = username
         session['role'] = 'Admin'
         session['name'] = 'Admin User'
         return redirect('/dashboard')
-     user = get_user(username)
-     if user and user['password'] == hash_password(password):
+
+    user = get_user(username)
+    if user and user['password'] == hash_password(password):
         session.permanent = True
         session['user'] = username
         session['role'] = user['role']
         session['name'] = user['name']
         save_login_history(username, user['role'])
         return redirect('/dashboard')
- 
+
     return render_template("login.html", error="❌ चुकीचा Username किंवा Password!")
+
+       
  
 # ================ DASHBOARD ================
  
