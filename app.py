@@ -29,7 +29,7 @@ if not firebase_admin._apps:
     try:
         cred = credentials.Certificate(json_path)
         firebase_admin.initialize_app(cred, {
-            "databaseURL": "https://bug-severity-project-default-rtdb.firebaseio.com"
+            "databaseURL":'https://bug-severity-project-default-rtdb.firebaseio.com'
         })
     except Exception as e:
         print("Firebase Error:", e)
