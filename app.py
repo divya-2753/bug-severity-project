@@ -475,8 +475,8 @@ def dashboard():
     recent_bugs = sorted(recent_bugs, key=lambda x: x.get('time', ''), reverse=True)[:5]
  
     # Charts generate करा
-    create_pie_chart(count)
-    create_trend_chart()
+    #create_pie_chart(count)
+    #create_trend_chart()
  
     return render_template(
         "dashboard.html",
@@ -647,9 +647,9 @@ def analytics():
     tag_counts = Counter(all_tags).most_common(6)
  
     # Charts generate करा
-    create_pie_chart(count)
-    create_trend_chart()
-    create_bar_chart(status_count)
+    #create_pie_chart(count)
+    #create_trend_chart()
+    #create_bar_chart(status_count)
  
     return render_template(
         "analytics.html",
