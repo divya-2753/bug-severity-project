@@ -396,17 +396,15 @@ def create_bar_chart(status_count):
     plt.tight_layout()
     plt.savefig("static/bar_chart.png", bbox_inches='tight', facecolor='#1e293b')
     plt.close()
- 
-# ================ LOGIN ================
+# ==================== LOGIN ====================
 @app.route('/login', methods=['POST'])
 def login():
-    username = request.form.get('username', '').strip()
-    password = request.form.get('password', '').strip()
+username = request.form.get('username', '').strip()
+password = request.form.get('password', '').strip()
 
     if not username or not password:
         return render_template("login.html", error="Username आणि Password टाका!")
 
-    # admin लॉगिन बायपास (लोकल आणि ऑनलाईन सर्व्हरसाठी)
     if username == 'admin' and password == 'admin123':
         session.permanent = True
         session['user'] = username
@@ -424,9 +422,6 @@ def login():
         return redirect('/dashboard')
 
     return render_template("login.html", error="❌ चुकीचा Username किंवा Password!")
-
-       
- 
 # ================ DASHBOARD ================
  
 @app.route('/dashboard', methods=['GET', 'POST'])
