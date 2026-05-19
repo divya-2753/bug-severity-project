@@ -398,7 +398,7 @@ def create_bar_chart(status_count):
     plt.close()
  
 # ================ LOGIN ================
- @app.route('/login', methods=['POST'])
+@app.route('/login', methods=['POST'])
 def login():
     username = request.form.get('username', '').strip()
     password = request.form.get('password', '').strip()
