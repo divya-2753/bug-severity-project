@@ -826,21 +826,21 @@ def admin():
     total = sum(count.values())
     users = get_users()
  
-    # Login history
-    login_ref = db.reference("login_history")
-    login_data = login_ref.get() or {}
-    recent_logins = sorted(login_data.values(), key=lambda x: x.get('time', ''), reverse=True)[:10]
- 
-    return render_template(
-        "admin.html",
-        data=data,
-        count=count,
-        status_count=status_count,
-        total=total,
-        users=users,
-        recent_logins=recent_logins,
-        role=session.get('role', 'User')
-    )
+#------------------Login history---------------
+users = get_users()
+
+recent_logins = []
+
+return render_template(
+    "admin.html",
+    data=data,
+    count=count,
+    status_count=status_count,
+    total=total,
+    users=users,
+    recent_logins=recent_logins,
+    role=session.get('role', 'User')
+)
  
 # ================ API ENDPOINTS (AJAX साठी) ================
  
