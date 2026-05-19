@@ -211,11 +211,13 @@ def ai_classify_bug(bug_description):
     }
  
 # ================ FIREBASE HELPERS ================
- 
+
+BUGS = {}
+
 def save_bug(bug, severity, suggestion, confidence, tags, username):
-    """Bug Firebase मध्ये save करा"""
-    ref = db.reference("bugs")
-    bug_id = ref.push({
+    bug_id = str(len(BUGS) + 1)
+
+    BUGS[bug_id] = {
         "bug": bug,
         "severity": severity,
         "suggestion": suggestion,
@@ -228,43 +230,41 @@ def save_bug(bug, severity, suggestion, confidence, tags, username):
         "time": str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
         "resolved_time": "",
         "comments": []
-    })
-    return bug_id.key
- 
+    }
+
+    return bug_id
+
 def get_all_bugs():
-    """सगळे bugs Firebase मधून आण"""
-    ref = db.reference("bugs")
-    data = ref.get() or {}
-    return data
- 
+    return BUGS
+
 def get_bug_counts():
-    """Firebase मधून live counts आण"""
-    data = get_all_bugs()
     count = {"High": 0, "Medium": 0, "Low": 0}
-    for item in data.values():
+
+    for item in BUGS.values():
         sev = item.get("severity", "")
         if sev in count:
             count[sev] += 1
+
     return count
- 
+
 def get_status_counts():
-    """Status counts आण"""
-    data = get_all_bugs()
-    status = {"Open": 0, "In Progress": 0, "Testing": 0, "Resolved": 0, "Closed": 0}
-    for item in data.values():
+    status = {
+        "Open": 0,
+        "In Progress": 0,
+        "Testing": 0,
+        "Resolved": 0,
+        "Closed": 0
+    }
+
+    for item in BUGS.values():
         s = item.get("status", "Open")
         if s in status:
             status[s] += 1
+
     return status
- 
+
 def save_login_history(username, role):
-    """Login history save करा"""
-    ref = db.reference("login_history")
-    ref.push({
-        "username": username,
-        "role": role,
-        "time": str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    })
+    return True
  
 # ================ GRAPH GENERATION ================
  
