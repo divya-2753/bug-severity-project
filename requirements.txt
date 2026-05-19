@@ -1,4 +1,4 @@
-flask==3.0.0
-firebase-admin==6.4.0
-matplotlib==3.8.0
-werkzeug==3.0.1
+flask==3.0.3
+firebase-admin==6.5.0
+matplotlib==3.8.4
+gunicorn==22.0.0
