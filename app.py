@@ -811,37 +811,34 @@ def delete(id):
     return redirect('/history')
  
 # ================ ADMIN PANEL ================
- 
 @app.route('/admin')
 def admin():
     if 'user' not in session:
         return redirect('/')
- 
+
     if session.get('role') != 'Admin':
         return redirect('/dashboard')
- 
+
     data = get_all_bugs()
     count = get_bug_counts()
     status_count = get_status_counts()
     total = sum(count.values())
     users = get_users()
- 
-#------------------Login history---------------
-users = get_users()
 
-recent_logins = []
+    #------------------Login history---------------
+    recent_logins = []
 
-return render_template(
-    "admin.html",
-    data=data,
-    count=count,
-    status_count=status_count,
-    total=total,
-    users=users,
-    recent_logins=recent_logins,
-    role=session.get('role', 'User')
-)
- 
+    return render_template(
+        "admin.html",
+        data=data,
+        count=count,
+        status_count=status_count,
+        total=total,
+        users=users,
+        recent_logins=recent_logins,
+        role=session.get('role', 'User')
+    ) 
+
 # ================ API ENDPOINTS (AJAX साठी) ================
  
 @app.route('/api/stats')
