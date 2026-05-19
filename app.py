@@ -25,7 +25,7 @@ app.permanent_session_lifetime = timedelta(hours=2)
  
 cred = credentials.Certificate("firebase.json")
 firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://bug-severity-project-default-rtdb.firebaseio.com/'  # 👈 तुझा Firebase URL इथे टाक
+    'databaseURL':'https://bug-severity-project-default-rtdb.firebaseio.com/'
 })
  
 # ================ USERS (Role Based) ================
