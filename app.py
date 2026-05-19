@@ -16,14 +16,14 @@ from firebase_admin import credentials, db
 
 # ================= INIT =================
 
-app = Flask(_name_)
+app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "supersecretkey")
 app.permanent_session_lifetime = timedelta(hours=2)
 
 # ================= FIREBASE =================
 
 if not firebase_admin._apps:
-    base_path = os.path.dirname(os.path.abspath(_file_))
+    base_path = os.path.dirname(os.path.abspath(__file__))
     json_path = os.path.join(base_path, "firebase.json")
 
     try:
