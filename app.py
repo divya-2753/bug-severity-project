@@ -20,6 +20,14 @@ from firebase_admin import credentials, db
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
 app.permanent_session_lifetime = timedelta(hours=2)
+
+print("Firebase exists:", os.path.exists("firebase.json"))
+
+with open("firebase.json", "r") as f:
+    data = json.load(f)
+
+print("Project:", data["project_id"])
+print("Key ID:", data["private_key_id"])
  
 # ================ FIREBASE SETUP ================
  
