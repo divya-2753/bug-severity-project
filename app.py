@@ -25,7 +25,7 @@ app.permanent_session_lifetime = timedelta(hours=2)
  
 cred = credentials.Certificate("firebase.json")
 firebase_admin.initialize_app(cred, {
-    'databaseURL':'https://bug-severity-project-default-rtdb.firebaseio.com/'
+    'databaseURL':'https://bug-severity-project-default-rtdb.firebaseio.com/' # 👈 तुझा Firebase URL इथे टाक
 })
  
 # ================ USERS (Role Based) ================
@@ -90,26 +90,27 @@ def ai_classify_bug(bug_description):
  
     # 🔴 High Severity Keywords
     high_keywords = {
-        "crash": 5, "down": 5, "not working": 4, "broken": 4,
-        "critical": 5, "urgent": 4, "emergency": 5, "data loss": 5,
-        "security": 4, "hack": 5, "breach": 5, "corrupt": 4,
-        "failure": 4, "failed": 3, "exception": 3, "500": 4,
-        "database down": 5, "server down": 5, "production": 4
+        "crash": 5, "down": 5,"not working": 4,"broken": 4, "critical": 5,"urgent": 4,"emergency": 5,"data loss": 5, "security": 5, "hack": 5,"breach": 5,"corrupt": 4,"failure": 4,"failed": 3,"exception": 4, "500": 5, "database down": 5,"server down": 5, "production": 5,
+         "otp": 4, "authentication": 5, "login failed": 4, "payment": 5, "transaction": 5, "refund": 4, "gateway": 4, "unauthorized": 5, "access denied": 5,
+         "jwt": 4, "token": 4, "session": 4, "memory leak": 5, "deadlock": 5, "race condition": 5, "microservice": 4,"service unavailable": 5, "503": 5, "502": 4, "null pointer": 5, "disk full": 5, "out of memory": 5
     }
- 
+    
     # 🟡 Medium Severity Keywords
     medium_keywords = {
         "error": 3, "bug": 2, "wrong": 2, "incorrect": 2,
         "not loading": 3, "timeout": 3, "slow response": 2,
         "404": 2, "400": 2, "login issue": 3, "cannot": 2,
-        "unable": 2, "missing": 2, "blank": 2, "empty": 2
+        "unable": 2, "missing": 2, "blank": 2, "empty": 2,
+        "profile": 2, "notification": 2, "email": 2, "report": 2,
+        "export": 2, "upload": 2, "download": 2, "api issue": 3, "dashboard": 2,
     }
  
     # 🟢 Low Severity Keywords
     low_keywords = {
         "slow": 1, "ui": 1, "design": 1, "color": 1,
         "spelling": 1, "typo": 1, "alignment": 1, "minor": 1,
-        "cosmetic": 1, "suggestion": 1, "improvement": 1
+        "cosmetic": 1, "suggestion": 1, "improvement": 1, "layout": 1,
+        "spacing": 1, "font": 1, "icon": 1, "responsive": 1, "theme": 1,
     }
  
     # 🏷️ Auto Tags
@@ -119,7 +120,12 @@ def ai_classify_bug(bug_description):
         "Database": ["database", "db", "sql", "firebase", "query", "data", "record", "table", "storage"],
         "Network": ["network", "internet", "connection", "timeout", "slow", "request", "response", "api"],
         "Security": ["security", "hack", "breach", "password", "login", "auth", "access", "permission"],
-        "Performance": ["slow", "lag", "speed", "performance", "memory", "cpu", "load", "response time"]
+        "Performance": ["slow", "lag", "speed", "performance", "memory", "cpu", "load", "response time"],
+        "Authentication": [ "login","logout","otp", "password","authentication","jwt","token","session","sso"],
+        "Payment": ["payment","transaction", "refund","billing", "checkout","gateway","upi"],
+        "API": ["api","endpoint","service","microservice"],
+        "Reporting": ["report","dashboard","analytics","chart","graph","export"],
+        "File Handling": ["upload","download","pdf","csv","file"]
     }
  
     # Score calculate करा
@@ -154,7 +160,6 @@ def ai_classify_bug(bug_description):
  
     # Severity आणि Confidence calculate करा
   # Severity calculate
-# Severity calculate
     if score >= 8:
         severity = "High"
         confidence = min(95, 70 + score * 2)
@@ -170,33 +175,47 @@ def ai_classify_bug(bug_description):
         confidence = min(85, 50 + score * 5)
         color = "success"
 
-    # 🎯 Dynamic Suggestions
-    if "login" in bug or "password" in bug:
-        suggestion = "🔐 Check authentication system and password validation."
+    # 🎯 Smart Dynamic Suggestions
+    if any(x in bug for x in ["otp","login","password","authentication","jwt","token","sso"]):
+        suggestion = "🔐 Authentication issue detected. Verify login flow, OTP delivery, token validation and session handling."
+    elif any(x in bug for x in ["payment","transaction","refund","billing","checkout","gateway","upi"]):
+        suggestion = "💳 Payment issue detected. Check transaction logs, gateway responses and payment reconciliation."
 
-    elif "ui" in bug or "design" in bug or "alignment" in bug:
-        suggestion = "🎨 Improve UI responsiveness and screen alignment."
+    elif any(x in bug for x in ["security","hack","breach","unauthorized","permission","xss","csrf"]):
+        suggestion = "🔒 Security issue detected. Review access control, authentication and security audit logs."
 
-    elif "database" in bug or "firebase" in bug or "server" in bug:
-        suggestion = "🗄️ Verify database/server connectivity and configuration."
+    elif any(x in bug for x in ["database","sql","firebase","query","record","deadlock"]):
+        suggestion = "🗄️ Database issue detected. Verify connectivity, query execution and data consistency."
 
-    elif "slow" in bug or "lag" in bug or "performance" in bug:
-        suggestion = "⚡ Optimize application performance and loading speed."
+    elif any(x in bug for x in ["memory leak","cpu","performance","slow","lag","timeout","latency"]):
+         suggestion = "⚡ Performance issue detected. Analyze resource utilization, response time and bottlenecks."
 
-    elif "crash" in bug or "exception" in bug or "error" in bug:
-        suggestion = "🐞 Check logs and exception handling for root cause."
+    elif any(x in bug for x in ["crash","exception","fatal","500","null pointer"]):
+         suggestion = "🐞 Application crash detected. Review stack traces, logs and exception handling."
 
-    elif "network" in bug or "connection" in bug or "timeout" in bug:
-        suggestion = "🌐 Check network connection and API response."
+    elif any(x in bug for x in ["network","connection","dns","503","502","api"]):
+        suggestion = "🌐 Network/API issue detected. Verify connectivity, endpoint availability and timeout settings."
+
+    elif any(x in bug for x in ["upload","download","pdf","csv","file"]):
+        suggestion = "📁 File handling issue detected. Verify file integrity, storage and upload/download processing."
+
+    elif any(x in bug for x in ["report","dashboard","analytics","chart","graph","export"]):
+        suggestion = "📊 Reporting issue detected. Validate report generation logic and data aggregation."
+
+    elif any(x in bug for x in ["ui","design","alignment","layout","button","screen"]):
+        suggestion = "🎨 UI issue detected. Review responsive layout and rendering behavior."
 
     else:
-        if severity == "High":
-            suggestion = "🚨 Critical issue detected! Immediate debugging required."
-        elif severity == "Medium":
-            suggestion = "⚠️ Medium severity issue. Code review recommended."
-        else:
-            suggestion = "ℹ️ Minor issue detected. Can be fixed in upcoming update."
+        suggestion = """
+🔍 Recommended Investigation
 
+    • Reproduce the issue consistently
+    • Review application logs
+    • Review server logs
+    • Analyze recent code changes
+    • Verify database and API interactions
+    • Perform root cause analysis
+    """
     # Confidence minimum 60%
     confidence = max(60, confidence)
 
@@ -211,13 +230,11 @@ def ai_classify_bug(bug_description):
     }
  
 # ================ FIREBASE HELPERS ================
-
-BUGS = {}
-
+ 
 def save_bug(bug, severity, suggestion, confidence, tags, username):
-    bug_id = str(len(BUGS) + 1)
-
-    BUGS[bug_id] = {
+    """Bug Firebase मध्ये save करा"""
+    ref = db.reference("bugs")
+    bug_id = ref.push({
         "bug": bug,
         "severity": severity,
         "suggestion": suggestion,
@@ -230,42 +247,67 @@ def save_bug(bug, severity, suggestion, confidence, tags, username):
         "time": str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
         "resolved_time": "",
         "comments": []
-    }
-
-    return bug_id
-
+    })
+    return bug_id.key
+ 
 def get_all_bugs():
-    return BUGS
-
+    """सगळे bugs Firebase मधून आण"""
+    ref = db.reference("bugs")
+    data = ref.get() or {}
+    return data
+ 
 def get_bug_counts():
+    """Firebase मधून live counts आण"""
+    data = get_all_bugs()
     count = {"High": 0, "Medium": 0, "Low": 0}
-
-    for item in BUGS.values():
+    for item in data.values():
         sev = item.get("severity", "")
         if sev in count:
             count[sev] += 1
-
     return count
-
+ 
 def get_status_counts():
-    status = {
-        "Open": 0,
-        "In Progress": 0,
-        "Testing": 0,
-        "Resolved": 0,
-        "Closed": 0
-    }
-
-    for item in BUGS.values():
+    """Status counts आण"""
+    data = get_all_bugs()
+    status = {"Open": 0, "In Progress": 0, "Testing": 0, "Resolved": 0, "Closed": 0}
+    for item in data.values():
         s = item.get("status", "Open")
         if s in status:
             status[s] += 1
-
     return status
-
-def save_login_history(username, role):
-    return True
  
+def save_login_history(username, role):
+    """Login history save करा"""
+    ref = db.reference("login_history")
+    ref.push({
+        "username": username,
+        "role": role,
+        "time": str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    })
+def save_notification(message, user="all"):
+    ref = db.reference("notifications")
+    ref.push({
+        "message": message,
+        "user": user,
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    })
+
+def get_notifications():
+    ref = db.reference("notifications")
+    data = ref.get() or {}
+
+    notifications = []
+    for key, item in data.items():
+        item["id"] = key
+        notifications.append(item)
+
+    notifications = sorted(
+        notifications,
+        key=lambda x: x.get("time", ""),
+        reverse=True
+    )
+
+    return notifications[:10]
 # ================ GRAPH GENERATION ================
  
 def create_pie_chart(count):
@@ -397,36 +439,40 @@ def home():
     if 'user' in session:
         return redirect('/dashboard')
     return render_template("login.html")
+ 
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form.get('username', '').strip()
     password = request.form.get('password', '').strip()
 
-    # ADMIN LOGIN
-    if username == "admin" and password == "admin123":
-        session['user'] = "admin"
-        session['role'] = "Admin"
-        session['name'] = "Admin User"
+    if not username or not password:
+        return render_template("login.html", error="Username आणि Password टाका!")
+
+    # १. Admin लॉगिन (थेट कोडमधून)
+    if username == 'admin' and password == 'admin123':
+        session.permanent = True
+        session['user'] = username
+        session['role'] = 'Admin'
+        session['name'] = 'Admin User'
         return redirect('/dashboard')
 
-    # DEVELOPER LOGIN
-    elif username == "developer" and password == "dev123":
-        session['user'] = "developer"
-        session['role'] = "Developer"
-        session['name'] = "Developer User"
+    # २. Developer लॉगिन (डेटाबेस खराब असला तरी थेट चालेल)
+    if username == 'developer' and password == 'dev123':
+        session.permanent = True
+        session['user'] = username
+        session['role'] = 'Developer'
+        session['name'] = 'Dev User'
         return redirect('/dashboard')
 
-    # TESTER LOGIN
-    elif username == "tester" and password == "test123":
-        session['user'] = "tester"
-        session['role'] = "Tester"
-        session['name'] = "Tester User"
+    # ३. Tester लॉगिन (थेट कोडमधून)
+    if username == 'tester' and password == 'test123':
+        session.permanent = True
+        session['user'] = username
+        session['role'] = 'Tester'
+        session['name'] = 'Tester User'
         return redirect('/dashboard')
 
-    return render_template(
-        "login.html",
-        error="❌ चुकीचा Username किंवा Password!"
-    )
+    return render_template("login.html", error="❌ चुकीचा Username किंवा Password!")
 # ================ DASHBOARD ================
  
 @app.route('/dashboard', methods=['GET', 'POST'])
@@ -455,12 +501,17 @@ def dashboard():
                 tags=ai_result['tags'],
                 username=session['user']
             )
+            save_notification(
+                 f"New bug reported by {session['user']} - {ai_result['severity']} Severity"
+            )
  
     # Live Stats
     count = get_bug_counts()
     status_count = get_status_counts()
     total = sum(count.values())
- 
+
+    notifications = get_notifications()
+    
     # Percentages
     high_p = round((count["High"] / total) * 100, 1) if total > 0 else 0
     medium_p = round((count["Medium"] / total) * 100, 1) if total > 0 else 0
@@ -475,19 +526,17 @@ def dashboard():
     recent_bugs = sorted(recent_bugs, key=lambda x: x.get('time', ''), reverse=True)[:5]
  
     # Charts generate करा
-    #create_pie_chart(count)
-    #create_trend_chart()
+    create_pie_chart(count)
+    create_trend_chart()
  
     return render_template(
-        "dashboard.html",
+       "dashboard.html",
         result=result,
         ai_result=ai_result,
         count=count,
         status_count=status_count,
         total=total,
-        high_p=high_p,
-        medium_p=medium_p,
-        low_p=low_p,
+        notifications=notifications,
         recent_bugs=recent_bugs,
         username=session.get('name', session['user']),
         role=session.get('role', 'User')
@@ -548,54 +597,59 @@ def history():
 def bug_detail(id):
     if 'user' not in session:
         return redirect('/')
-
-    data = get_all_bugs()
-    bug = data.get(id)
-
+ 
+    ref = db.reference(f"bugs/{id}")
+    bug = ref.get()
+ 
     if not bug:
         return redirect('/history')
-
+ 
     bug['id'] = id
     return render_template("bug_detail.html", bug=bug, role=session.get('role', 'User'))
+ 
 # ================ UPDATE BUG STATUS ================
  
 @app.route('/bug/update/<id>', methods=['POST'])
 def update_bug(id):
     if 'user' not in session:
         return redirect('/')
-
-    bug = BUGS.get(id)
-
+ 
+    ref = db.reference(f"bugs/{id}")
+    bug = ref.get()
+ 
     if bug:
         new_status = request.form.get('status', bug.get('status', 'Open'))
         new_assigned = request.form.get('assigned_to', bug.get('assigned_to', ''))
         new_priority = request.form.get('priority', bug.get('priority', 'P2'))
         comment = request.form.get('comment', '').strip()
-
+ 
         update_data = {
             'status': new_status,
             'assigned_to': new_assigned,
             'priority': new_priority
         }
-
+ 
+        # Resolved time set करा
         if new_status == 'Resolved' and not bug.get('resolved_time'):
             update_data['resolved_time'] = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-
+ 
+        # Comment add करा
         if comment:
             comments = bug.get('comments', [])
             if isinstance(comments, dict):
                 comments = list(comments.values())
-
             comments.append({
                 "text": comment,
                 "by": session['user'],
                 "time": str(datetime.now().strftime("%Y-%m-%d %H:%M"))
             })
-
             update_data['comments'] = comments
-
-        BUGS[id].update(update_data)
-
+ 
+        ref.update(update_data)
+        save_notification(
+             f"Bug status changed to {new_status} by {session['user']}"
+        )
+ 
     return redirect(f'/bug/{id}')
  
 # ================ ANALYTICS ================
@@ -645,9 +699,9 @@ def analytics():
     tag_counts = Counter(all_tags).most_common(6)
  
     # Charts generate करा
-    #create_pie_chart(count)
-    #create_trend_chart()
-    #create_bar_chart(status_count)
+    create_pie_chart(count)
+    create_trend_chart()
+    create_bar_chart(status_count)
  
     return render_template(
         "analytics.html",
@@ -799,34 +853,36 @@ def download_json():
 def delete(id):
     if 'user' not in session:
         return redirect('/')
-
+ 
     # फक्त Admin delete करू शकतो
     if session.get('role') != 'Admin':
         return redirect('/history')
-
-    if id in BUGS:
-        del BUGS[id]
-
+ 
+    ref = db.reference("bugs")
+    ref.child(id).delete()
     return redirect('/history')
  
 # ================ ADMIN PANEL ================
+ 
 @app.route('/admin')
 def admin():
     if 'user' not in session:
         return redirect('/')
-
+ 
     if session.get('role') != 'Admin':
         return redirect('/dashboard')
-
+ 
     data = get_all_bugs()
     count = get_bug_counts()
     status_count = get_status_counts()
     total = sum(count.values())
     users = get_users()
-
-    #------------------Login history---------------
-    recent_logins = []
-
+ 
+    # Login history
+    login_ref = db.reference("login_history")
+    login_data = login_ref.get() or {}
+    recent_logins = sorted(login_data.values(), key=lambda x: x.get('time', ''), reverse=True)[:10]
+ 
     return render_template(
         "admin.html",
         data=data,
@@ -836,8 +892,8 @@ def admin():
         users=users,
         recent_logins=recent_logins,
         role=session.get('role', 'User')
-    ) 
-
+    )
+ 
 # ================ API ENDPOINTS (AJAX साठी) ================
  
 @app.route('/api/stats')
@@ -894,9 +950,18 @@ def server_error(e):
     return render_template("login.html", error="Server Error! Admin ला contact करा."), 500
  
 # ================ RUN ================
+ 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(debug=True, host="0.0.0.0", port=port)
+    app.run(debug=True, host='0.0.0.0', port=5000)
+
+
+
+
+
+
+
+
+
 
 
 
