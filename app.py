@@ -22,7 +22,7 @@ app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
 app.permanent_session_lifetime = timedelta(hours=2)
  
 # ================ FIREBASE SETUP ================
- 
+print("firebase.json exists:", os.path.exists("firebase.json"))
 cred = credentials.Certificate("firebase.json")
 firebase_admin.initialize_app(cred, {
     'databaseURL':'https://bug-severity-project-default-rtdb.firebaseio.com/'
