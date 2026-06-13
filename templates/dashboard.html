@@ -94,6 +94,28 @@
         .delay-1 { animation-delay:0.1s; }
         .delay-2 { animation-delay:0.2s; }
         .delay-3 { animation-delay:0.3s; }
+        .notification-box{
+         background:var(--surface);
+         border:1px solid var(--border);
+         border-radius:16px;
+         padding:20px;
+         margin-bottom:20px;
+        }
+
+        .notification-item{
+         padding:10px 0;
+         border-bottom:1px solid var(--border);
+        }
+
+        .notification-item:last-child{
+            border-bottom:none;
+        }
+
+        .notification-time{
+            color:var(--muted);
+            font-size:11px;
+            margin-top:4px;
+        }
     </style>
 </head>
 <body>
@@ -130,7 +152,34 @@
             <h1>Dashboard 📊</h1>
             <p>// Welcome back, {{ username }} · {{ role }}</p>
         </div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);" id="clock"></div>
+        <div style="display:flex;align-items:center;gap:15px;position:relative;">
+
+    <!-- 🔔 Bell (CLICKABLE) -->
+    <div style="position:relative;cursor:pointer;" onclick="toggleNotifications(event)">
+        🔔
+        <span style="background:red;color:white;border-radius:50%;padding:2px 6px;font-size:10px;position:absolute;top:-8px;right:-10px;">
+            {{ notifications|length }}
+        </span>
+    </div>
+
+    <!-- Clock (same as before) -->
+    <div id="clock"></div>
+
+    </div>  
+
+    </div>
+    <div id="notifBox"
+     style="display:none;position:absolute;right:30px;top:80px;width:300px;
+     background:var(--surface);border:1px solid var(--border);
+     border-radius:12px;padding:15px;z-index:999;">
+
+    {% for n in notifications %}
+    <div style="padding:10px;border-bottom:1px solid var(--border);">
+        <div>{{ n.message }}</div>
+        <div style="font-size:11px;color:var(--muted);">{{ n.time }}</div>
+    </div>
+    {% endfor %}
+
     </div>
     <div class="stats-grid">
         <div class="stat-card total animate delay-1">
@@ -244,15 +293,49 @@
         {% endif %}
     </div>
 </main>
+<!-- 1. Notification script (NEW) -->
+<script>
+function toggleNotifications(event) {
+    const box = document.getElementById("notifBox");
+
+    if (box.style.display === "none" || box.style.display === "") {
+        box.style.display = "block";
+    } else {
+        box.style.display = "none";
+    }
+
+    event.stopPropagation();
+}
+
+document.addEventListener("click", function(event) {
+    const box = document.getElementById("notifBox");
+    const bell = document.querySelector('[onclick="toggleNotifications(event)"]');
+
+    if (box && bell && !box.contains(event.target) && !bell.contains(event.target)) {
+        box.style.display = "none";
+    }
+});
+</script>
+
+
+<!-- 2. EXISTING script (your clock + animation) -->
 <script>
     function updateClock() {
         const now = new Date();
-        document.getElementById('clock').textContent = now.toLocaleDateString('en-IN') + ' · ' + now.toLocaleTimeString('en-IN');
+        document.getElementById('clock').textContent =
+            now.toLocaleDateString('en-IN') + ' · ' + now.toLocaleTimeString('en-IN');
     }
-    updateClock(); setInterval(updateClock, 1000);
+
+    updateClock();
+    setInterval(updateClock, 1000);
+
     window.addEventListener('load', () => {
         const fill = document.querySelector('.confidence-fill');
-        if (fill) { const w = fill.style.width; fill.style.width='0'; setTimeout(()=>fill.style.width=w, 100); }
+        if (fill) {
+            const w = fill.style.width;
+            fill.style.width = '0';
+            setTimeout(() => fill.style.width = w, 100);
+        }
     });
 </script>
 </body>
