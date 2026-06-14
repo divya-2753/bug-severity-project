@@ -24,6 +24,8 @@ app.permanent_session_lifetime = timedelta(hours=2)
 # ================ FIREBASE SETUP ================
 firebase_config = json.loads(os.environ["FIREBASE_JSON_KEY"])
 
+firebase_config["private_key"] = firebase_config["private_key"].replace("\\n", "\n")
+
 cred = credentials.Certificate(firebase_config)
 
 firebase_admin.initialize_app(
@@ -35,10 +37,10 @@ firebase_admin.initialize_app(
 
 # Test connection
 try:
-    test_ref = db.reference("/")
-    print("Firebase Connected")
+    db.reference("/").get()
+    print("Firebase Connected Successfully")
 except Exception as e:
-    print("Firebase Error:", str(e))
+    print("Firebase Error:", e)
  
 # ================ USERS (Role Based) ================
  
