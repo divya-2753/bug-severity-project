@@ -29,7 +29,7 @@ cred = credentials.Certificate(firebase_config)
 firebase_admin.initialize_app(
     cred,
     {
-        "databaseURL": "https://bug-severity-project-default-rtdb.firebaseio.com/"
+        "databaseURL": "https://bug-severity-predictor-system-default-rtdb.firebaseio.com/"
     }
 )
 
