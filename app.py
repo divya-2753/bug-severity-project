@@ -22,24 +22,23 @@ app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
 app.permanent_session_lifetime = timedelta(hours=2)
  
 # ================ FIREBASE SETUP ================
-print("firebase.json exists:", os.path.exists("firebase.json"))
+firebase_config = json.loads(os.environ["FIREBASE_JSON_KEY"])
 
-with open("firebase.json", "r") as f:
-    data = json.load(f)
+cred = credentials.Certificate(firebase_config)
 
-print("Project:", data.get("project_id"))
-print("Client:", data.get("client_email"))
-print("Key ID:", data.get("private_key_id"))
+firebase_admin.initialize_app(
+    cred,
+    {
+        "databaseURL": "https://bug-severity-project-default-rtdb.firebaseio.com/"
+    }
+)
 
-cred = credentials.Certificate("firebase.json")
-firebase_admin.initialize_app(cred, {
-    'databaseURL':'https://bug-severity-project-default-rtdb.firebaseio.com/'
-})
+# Test connection
 try:
     test_ref = db.reference("/")
-    print("Firebase Connected:", test_ref.get())
+    print("Firebase Connected")
 except Exception as e:
-    print("Firebase Connection Error:", e)
+    print("Firebase Error:", str(e))
  
 # ================ USERS (Role Based) ================
  
