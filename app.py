@@ -35,6 +35,11 @@ cred = credentials.Certificate("firebase.json")
 firebase_admin.initialize_app(cred, {
     'databaseURL':'https://bug-severity-project-default-rtdb.firebaseio.com/'
 })
+try:
+    test_ref = db.reference("/")
+    print("Firebase Connected:", test_ref.get())
+except Exception as e:
+    print("Firebase Connection Error:", e)
  
 # ================ USERS (Role Based) ================
  
