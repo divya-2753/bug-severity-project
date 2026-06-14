@@ -23,6 +23,14 @@ app.permanent_session_lifetime = timedelta(hours=2)
  
 # ================ FIREBASE SETUP ================
 print("firebase.json exists:", os.path.exists("firebase.json"))
+
+with open("firebase.json", "r") as f:
+    data = json.load(f)
+
+print("Project:", data.get("project_id"))
+print("Client:", data.get("client_email"))
+print("Key ID:", data.get("private_key_id"))
+
 cred = credentials.Certificate("firebase.json")
 firebase_admin.initialize_app(cred, {
     'databaseURL':'https://bug-severity-project-default-rtdb.firebaseio.com/'
